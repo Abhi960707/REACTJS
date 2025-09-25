@@ -1,0 +1,23 @@
+.text{
+  background-color: rgb(155, 141, 155);
+  /* margin-left: 500px; */
+  list-style: none;
+  text-align: center;
+}
+
+img{
+  justify-content: center;
+  margin-left: 700px;
+}
+
+input{
+    color: rgb(204, 119, 7);
+    height: 40px;
+    width: 250px;
+    text-align: center;
+    align-items: center;
+    font-size: 25px;
+}
+.data{
+    list-style: none;
+}

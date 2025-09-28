@@ -1,3 +1,5 @@
+
+
 .text{
   background-color: rgb(155, 141, 155);
   /* margin-left: 500px; */
@@ -5,14 +7,26 @@
   text-align: center;
 }
 
+.imgclass{
+  margin-left: 200px;
+  margin: 10px;
+   border: 1px solid rgb(10, 10, 10);
+  
+}
+.passwordbtn{
+  margin: 10px;
+}
 img{
   justify-content: center;
-  margin-left: 700px;
+  margin-left: 500px;
+  margin-bottom: 200px;
+  margin: 10px;
 }
 
 input{
+ 
     color: rgb(204, 119, 7);
-    height: 40px;
+    height: 30px;
     width: 250px;
     text-align: center;
     align-items: center;
@@ -20,4 +34,16 @@ input{
 }
 .data{
     list-style: none;
+}
+
+/* li{
+  list-style: none;
+
+} */
+
+.submitbtn{
+  width: 100px;
+  height: 40px;
+  margin: 20px;
+
 }

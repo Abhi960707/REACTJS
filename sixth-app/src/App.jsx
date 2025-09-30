@@ -77,20 +77,25 @@ function App() {
 
   //assumed that this data is coming from backend api
   const student = [
-    { name: "Shriram", email: "ram07@gmail.com", mobile: "9895652652", city: "Pune" },
+    { name: "Shriram", email: "ram07@gmail.com", mobile: "9895652652", city: "Pune",laptop:"Dell"},
     { name: "Raj", email: "ram07@gmail.com", mobile: "9895652652", city: "Pune" },
-    { name: "Sitaram555", email: "ram07@gmail.com", mobile: "9895652652", city: "Pune" },
-    { name: "Ranjeet", email: "ram07@gmail.com", mobile: "9895652652", city: "Pune" },
+    { name: "Sitaram555", email: "ram07@gmail.com", mobile: "9895652652", city: "Pune",laptop:"Hp" },
+    { name: "Ranjeet", email: "ram07@gmail.com", mobile: "9895652652", city: "Pune",laptop:"Apple" },
   ];
   const [count, setCount] = useState(0)
 
   return (
     <div className='flex p-3 gap-5 flex-wrap justify-center' >
       {
-        student.map(stud => <Student name={stud.name} email={stud.email} mobile={stud.mobile} city={stud.city} />)
+        student.map((stud,index) => <Student key={index} name={stud.name} email={stud.email} mobile={stud.mobile} city={stud.city} laptop={stud.laptop} />) //Console error delete used in this line index 
 
 
       }
+      <Student name="Ram" email="ram@gmail.com" mobile="8464945565" city="Puna" laptop="Lenovo" />
+       <Student name="Shreyash" email="shreyash@gmail.com" mobile="8464945565" city="Puna" />
+        <Student name="Pooja" email="pooja@gmail.com" mobile="8464945565" city="Puna" laptop="Asus" />
+         <Student name="Shweta" email="shweta@gmail.com" mobile="8464945565" city="Puna" />
+
 
 
 

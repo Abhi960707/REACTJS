@@ -13,7 +13,8 @@ const Csk = () => {
                 <img src="https://img.jagranjosh.com/images/2023/May/3052023/ipl-2023-winner-chennai-super-kings-csk.webp" alt="" height={500} width={600} />
             </div>
 
-            <div className='justify-center items-center text-center flex gap-20 bg-orange-500'>  <img src="https://www.hindustantimes.com/ht-img/img/2023/04/04/1600x900/PTI04-03-2023-000365A-0_1680606588325_1680606588325_1680606904951_1680606904951.jpg" alt="" height={500} width={600} />
+            <div className='justify-center items-center text-center flex gap-20 bg-orange-500'> 
+                 <img src="https://www.hindustantimes.com/ht-img/img/2023/04/04/1600x900/PTI04-03-2023-000365A-0_1680606588325_1680606588325_1680606904951_1680606904951.jpg" alt="" height={500} width={600} />
                 <img src="https://th.bing.com/th/id/OIP.coIVE0d-FDgQtQVfNd9YGgHaEK?w=322&h=181&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3" alt="" height={500} width={600} />
             </div>
         </div>

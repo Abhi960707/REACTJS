@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+ {/** All Manually validation this form */}
+import { useEffect } from "react";    
 import { useState } from "react";
 
 const RegisterForm = () => {
@@ -61,7 +62,7 @@ const RegisterForm = () => {
         e.preventDefault();
 
         const userData = { firstName, lastName, email, password, confirmPassword };
-        console.log('USER DATA: ', userData)
+        console.log('USER DATA: ', userData)  //Print the console and proceed the all data inn console,db etc
     }
 
     return (

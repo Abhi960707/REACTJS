@@ -19,7 +19,7 @@ const Contact = () => {
             setPasswordError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
         }
 
-        // // Validation for password
+        // // Validation for password fields
         // 
         // if (password.length < 8) {
         //     setPasswordError('Password must be at least 8 characters long');

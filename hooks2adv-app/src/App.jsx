@@ -5,6 +5,7 @@ import About from "./components/About";
 import Contact from "./components/Contact";
 import Services from "./components/Services";
 import RegisterForm from "./components/RegisterForm";
+import NewRegisterForm from "./components/NewRegisterForm";
 
 const App = () => {
     return (
@@ -16,7 +17,10 @@ const App = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/services" element={<Services />} />
-                <Route path="/registerForm" element={<RegisterForm />}/>
+                <Route path="/registerForm" element={<RegisterForm />}/>          {/** All Manually validation this form */}
+                <Route path="/newregisterForm" element={<NewRegisterForm />}/>  {/** Using 1.react-hook-form library package installation in console
+                                                                                     All Automatically validation this form using this library*/}
+
             </Routes>
         </BrowserRouter>
        

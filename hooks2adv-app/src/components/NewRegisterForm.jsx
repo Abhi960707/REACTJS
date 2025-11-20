@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 
 const NewRegisterForm = () => {
 
-    const { register, handleSubmit,formState:{errors,isSubmitted},watch } = useForm();  //Automatically validation this 2 function 1.register 2.handleSubmit & object is formState:{erors}
+    const { register, handleSubmit,formState:{errors,isSubmitted},watch } = useForm();  //Automatically validation this 2 function 1.register 2.handleSubmit & object is formState:{erors,isSubmitted},watch
 
     const password=watch('password');
     const onSubmit = (data) => {
@@ -24,7 +24,7 @@ const NewRegisterForm = () => {
 
     return (
         <div className="bg-gray-200 min-h-screen p-4">
-            <h1 className="text-center my-5 text-4xl font-bold">Register Form</h1>
+            <h1 className="text-center my-5 text-4xl font-bold">New Register Form</h1>
             <form className="shadow-md border rounded-2xl p-6 md:w-1/2 lg:w-1/3 mx-auto"
                 onSubmit={handleSubmit(onSubmit)}>
                 <div className="mb-4">

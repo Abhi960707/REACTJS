@@ -1,6 +1,7 @@
 
 import { Link } from "react-router-dom"
 
+
 const Navbar = () => {
   return (
     <nav className="bg-slate-500 text-white p-4">
@@ -11,6 +12,8 @@ const Navbar = () => {
             <li className="cursor-pointer"><Link to="/services">Services</Link></li>
             <li className="cursor-pointer"><Link to="/registerForm">RegisterForm</Link></li>
             <li className="cursor-pointer"><Link to="/newRegisterForm">NewRegisterForm</Link></li>
+            <li className="cursor-pointer"><Link to="/bestRegisterForm">BestRegisterForm</Link></li>
+
 
         </ul>
     </nav>

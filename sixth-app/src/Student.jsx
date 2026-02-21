@@ -36,7 +36,7 @@ const Student = ({name,email,mobile,city,laptop}) => {
   <div className='text-2 text-center'>
     <h1 className='text-3x1 mb-2 text-orange-500'>{name}</h1>
     {laptop && <p className='m-2 text-blue-500'>{laptop}</p>} 
-                                                             {/* Rendoring space used the Logical stmt in javascript, Means jyala data dilay toch run hoil */}
+                                                                      {/* Rendoring space used the Logical stmt in javascript, Means jyala data dilay toch run hoil */}
     <p className='m-2 text-blue-500'>{email}</p>
      <p className='m-2'>{mobile}</p>
       <p className='m-2'>{city}</p>

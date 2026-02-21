@@ -2,7 +2,7 @@ import React from 'react'
 import profilepic from './assets/profilepic.jpg'
 
 
-// #Step 1 simple
+// #Step 1 simple Methods in Shorts
 // const Student = (props) => {
 //   return (
 //   <div className="border-2 border-blue-500 w-1/4 p-5 rounded-2*1">
@@ -25,7 +25,7 @@ import profilepic from './assets/profilepic.jpg'
 
 
 
-// Step 2 Hard
+// Step 2 Hard Methods 
 const Student = ({name,email,mobile,city,laptop}) => {
   return (
   <div className="border-2 border-green-500 w-1/4 p-5 rounded-2x1">

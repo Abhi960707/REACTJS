@@ -35,7 +35,7 @@ const Projects = () => {
 
         <div className="bg-gray-900 p-6 rounded-lg">
           <h3 className="text-xl font-semibold text-blue-400 cursor-pointer">
-            Online Campus Recruitment System
+            Online Campus Recruitment System.
           </h3>
           <p className="mt-3 text-gray-400">
             ASP.NET based platform for job postings and student accounts.

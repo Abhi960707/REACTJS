@@ -35,6 +35,7 @@ const QrCodeGenerator = () => {
             {
                 value.length > 0 && <div className="flex flex-col justify-center items-center">
                     <QRCode value={value} className="border p-2" />
+                    
                     <div className="flex mb-7 text-center">
                         <button type="button" className="flex items-center text-xl bg-blue-400 rounded px-3 py-2 m-1 cursor-pointer"><FaPrint />Print</button>
 

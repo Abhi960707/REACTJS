@@ -18,6 +18,7 @@ const Navbar = () => {
                     <option value="">Mumbai</option>
                     <option value="">Nashik</option>
                     <option value="">Solapur</option>
+                    <option value="">Kolhapur</option>
                 </select>
 
                 <input className='text3' type="text" placeholder='Search Car' />

@@ -1,46 +1,141 @@
-import React from 'react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import API from '../api'
+import { saveAuthSession } from '../utils/auth'
+import AuthLayout from './AuthLayout'
 
 const Signup = () => {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [secretKeyword, setSecretKeyword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const navigate = useNavigate()
 
-  const submit = (e) => {
-    e.preventDefault();
-    console.log(name, email, password);
-    navigate("/login");
+  const submit = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    if (!name.trim() || !email.trim() || !password.trim() || !secretKeyword.trim()) {
+      setError('All fields are required')
+      setTimeout(() => setError(''), 3000)
+      return
+    }
+
+    if (password.trim().length < 4) {
+      setError('Password must be at least 4 characters')
+      setTimeout(() => setError(''), 3000)
+      return
+    }
+
+    try {
+      setLoading(true)
+      const res = await API.post('/auth/signup', {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        secretKeyword: secretKeyword.trim(),
+      })
+
+      saveAuthSession(res.data)
+      navigate('/todolist')
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to create account')
+      setTimeout(() => setError(''), 3000)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className='flex items-center justify-center min-h-screen bg-blue-300 from-blue-500 to-purple-600 p-4'>
-      <div className='bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md'>
-        <h1 className='text-3xl font-bold text-center text-gray-800 mb-8'>
-          Create Account
-        </h1>
-        <form className='flex flex-col gap-5' onSubmit={submit}>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Name</label>
-            <input type='text' placeholder='Enter your name' className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all' onChange={(e) => setName(e.target.value)} required />
-          </div>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Email</label>
-            <input type='email' placeholder='Enter your email' className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all' onChange={(e) => setEmail(e.target.value)} required />
-          </div>
-          <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>Password</label>
-            <input type='password' placeholder='Enter a password' className='w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all' onChange={(e) => setPassword(e.target.value)} required />
-          </div>
-          <button type='submit' className='w-full bg-pink-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 mt-2'>Sign Up</button>
-        </form>
-        <p className='text-center mt-6 text-sm text-gray-600'>
+    <AuthLayout
+      eyebrow="Create Account"
+      title="Build your workspace"
+      description="Create your account in one centered vertical layout and go straight into the dashboard, where creating users and assigning tasks works in the same flow."
+      footer={
+        <p className="mt-6 text-center text-sm text-slate-500">
           Already have an account?{' '}
-          <Link to="/login" className='text-blue-600 font-semibold hover:underline'>Login here</Link>
+          <Link to="/" className="font-semibold text-slate-900 hover:underline">
+            Login here
+          </Link>
         </p>
+      }
+    >
+      <div className="text-center">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-slate-400">
+          Create Account
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold text-slate-900">Create your account</h1>
+        <p className="mt-2 text-sm text-slate-500">Create an account to manage your own tasks.</p>
       </div>
-    </div>
+
+      {error && (
+        <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+          {error}
+        </div>
+      )}
+
+      <form className="mt-6 space-y-5" onSubmit={submit} autoComplete="off">
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">Full name</label>
+          <input
+            type="text"
+            placeholder="Enter your full name"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">Email</label>
+          <input
+            type="email"
+            autoComplete="off"
+            placeholder="Enter your email address"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">Password</label>
+          <input
+            type="password"
+            autoComplete="new-password"
+            placeholder="Create a password (min 4 characters)"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">Security Keyword</label>
+          <input
+            type="text"
+            placeholder="Enter a secret name (for password recovery)"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
+            value={secretKeyword}
+            onChange={(e) => setSecretKeyword(e.target.value)}
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {loading ? 'Creating account...' : 'Create account'}
+        </button>
+      </form>
+    </AuthLayout>
   )
 }
 

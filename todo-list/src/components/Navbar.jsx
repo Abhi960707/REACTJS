@@ -1,73 +1,219 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { clearAuthSession, getStoredUser } from '../utils/auth'
+import API from '../api'
 
-const Navbar = ({ userName = 'User' }) => {
-  const navigate = useNavigate()
-  const [menuOpen, setMenuOpen] = useState(false)
+const SearchIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+)
+
+const BellIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+  </svg>
+)
+
+const Navbar = ({ notificationCount, onNotificationClick, user: propUser, setIsSidebarOpen }) => { // Accept propUser and setIsSidebarOpen
+  const navigate = useNavigate();
+  // Use propUser if provided, otherwise fallback to stored user
+  const [user, setUser] = useState(() => propUser || getStoredUser() || { name: 'User', email: 'guest@example.com' });
+  
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [users, setUsers] = useState([])
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [navNotifCount, setNavNotifCount] = useState(0)
+  
+  const searchRef = useRef(null)
+  const profileRef = useRef(null)
+
+  // Sync state with propUser if it changes from outside
+  useEffect(() => {
+    if (propUser) {
+      setUser(propUser);
+    }
+  }, [propUser]);
+
+  useEffect(() => {
+    if (isSearchOpen && users.length === 0) {
+      API.get('/auth/users').then(res => setUsers(res.data.users)).catch(console.error)
+    }
+  }, [isSearchOpen, users.length])
+
+  useEffect(() => {
+    if (notificationCount !== undefined) {
+      setNavNotifCount(notificationCount)
+    } else {
+      API.get('/todo/notifications').then(res => setNavNotifCount(res?.data?.length || 0)).catch(() => {})
+    }
+  }, [notificationCount])
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setIsSearchOpen(false)
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target)) { // Check for profile dropdown
+        setIsProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const logout = () => {
-    localStorage.clear()
-    navigate('/')
+    clearAuthSession()
+    navigate('/login')
   }
 
+  const handleNotificationClick = () => {
+    if (onNotificationClick) {
+      onNotificationClick()
+    } else {
+      navigate('/notifications')
+    }
+  }
+
+  const filteredUsers = users.filter(u => 
+    u.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.email.toLowerCase().includes(searchQuery.toLowerCase())
+  ).slice(0, 5)
+
+  const firstLetter = user.name ? user.name.charAt(0).toUpperCase() : 'U'
+
+  const isAuthenticated = user && (user.id || user._id || (user.email && user.email !== 'guest@example.com'));
+
   return (
-    <nav className="bg-gray-900 text-white px-6 py-4 flex items-center justify-between shadow-lg relative">
+    <nav className="bg-white border-b border-slate-200 px-6 h-[60px] flex items-center justify-between sticky top-0 z-[105]">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center p-1">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <path d="M9 11L12 14L22 4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <span className="text-xl font-bold tracking-wide">Todo </span>
-      </div>
-
-      <div className="hidden md:flex gap-6 items-center text-sm font-medium">
-        <a href="#" className="text-blue-400 hover:text-blue-300 transition-colors">Dashboard</a>
-        <a href="#" className="text-gray-300 hover:text-white transition-colors">Analytics</a>
-        <a href="#" className="text-gray-300 hover:text-white transition-colors">Calendar</a>
-      </div>
-
-      <div className="relative">
-        <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 p-2 rounded-lg transition-colors" onClick={() => setMenuOpen(!menuOpen)}>
-          <div className="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center font-bold text-sm shadow-inner">
-            {userName.charAt(0).toUpperCase()}
+        <Link to="/todolist" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center p-1 shadow-sm">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+              <path d="M9 11L12 14L22 4" stroke="currentColor" className="text-white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" className="text-white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
-          <span className="hidden sm:block font-medium text-sm">{userName}</span>
-          <svg className={`w-4 h-4 transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none">
-            <path d="M6 9L12 15L18 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
+          <span className="items-center justify-center text-xl font-bold tracking-wide text-slate-900">Todo</span>
+        </Link>
+      </div>
 
-        {menuOpen && (
-          <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl overflow-hidden z-50 text-gray-800 border border-gray-100">
-            <div className="flex items-center gap-3 p-4 bg-gray-50 border-b border-gray-100">
-              <div className="w-10 h-10 rounded-full bg-pink-600 flex items-center justify-center font-bold text-white shadow-inner">{userName.charAt(0).toUpperCase()}</div>
-              <div>
-                <p className="font-bold text-sm text-gray-900">{userName}</p>
-                <p className="text-xs text-gray-500">abhi@gmail.com</p>
+      {isAuthenticated && (
+        <div className="flex items-center gap-4">
+          {/* Search */}
+          <div className="relative" ref={searchRef}>
+            {isSearchOpen ? (
+              <div className="flex items-center bg-slate-100 rounded-full px-3 py-1.5 transition-all w-64 border border-slate-200 shadow-inner">
+                <SearchIcon />
+                <input 
+                  type="text" 
+                  placeholder="Search users..." 
+                  className="bg-transparent border-none outline-none ml-2 text-sm w-full text-slate-800"
+                  autoFocus
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                />
               </div>
-            </div>
-            <div className="p-2 flex flex-col gap-1">
-            <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg text-sm font-medium transition-colors text-gray-700">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/></svg>
-              Profile
-            </button>
-            <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg text-sm font-medium transition-colors text-gray-700">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" strokeWidth="2"/></svg>
-              Settings
-            </button>
-            <div className="my-1 border-t border-gray-100" />
-            <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-red-50 hover:text-red-600 rounded-lg text-sm font-medium transition-colors text-red-500" onClick={logout}>
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><polyline points="16 17 21 12 16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-              Logout
-            </button>
-            </div>
+            ) : (
+              <button 
+                onClick={() => setIsSearchOpen(true)}
+                className="p-2 rounded-full text-slate-500 hover:bg-slate-100 transition"
+              >
+                <SearchIcon />
+              </button>
+            )}
+
+            {isSearchOpen && searchQuery && (
+              <div className="absolute top-[56px] right-0 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden py-2 z-[110]">
+                <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">Users</div>
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map(u => (
+                    <Link 
+                      key={u.id}
+                      to={`/user/${u.id}`}
+                      onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}
+                      className="flex justify-between items-center px-4 py-3 hover:bg-slate-50 transition border-b border-white last:border-0"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800">{u.name}</p>
+                        <p className="text-xs text-slate-500">{u.email}</p>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="px-4 py-3 text-sm text-slate-500">No users found.</div>
+                )}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          {/* Notifications */}
+          <button 
+            onClick={handleNotificationClick}
+            className="relative p-2 rounded-full text-slate-500 hover:bg-slate-100 transition"
+          >
+            <BellIcon />
+            {navNotifCount > 0 && (
+              <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm border-[1.5px] border-white">
+                {navNotifCount > 9 ? '9+' : navNotifCount}
+              </span>
+            )}
+          </button>
+
+          {/* Profile Dropdown */}
+          <div className="relative z-50" ref={profileRef}> {/* Attach ref here */}
+            <button 
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className="w-10 h-10 rounded-full bg-blue-600 text-white font-semibold flex items-center justify-center hover:ring-2 hover:ring-blue-200 transition-all shadow-sm"
+            >
+              {firstLetter}
+            </button>
+            {isProfileOpen && (
+              // Removed the fixed inset-0 div, as handleClickOutside will manage closing
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-[110] flex flex-col">
+                  <div className="px-4 py-3 border-b border-slate-100">
+                    <p className="text-sm font-semibold text-slate-900">{user.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                  </div>
+                  <div className="py-1">
+                    <Link 
+                      to={`/user/${user.id || user._id || ""}`}
+                      onClick={() => setIsProfileOpen(false)}
+                      className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition"
+                    >
+                      My Profile
+                    </Link>
+                    <Link 
+                      to="/settings"
+                      onClick={() => setIsProfileOpen(false)}
+                      className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition"
+                    >
+                      Security & Settings
+                    </Link>
+                  </div>
+                  <div className="border-t border-slate-100 py-1 mt-auto">
+                    <button 
+                      onClick={logout}
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   )
 }
+
+// Add default props for safety, especially for setIsSidebarOpen if it's not always provided
+Navbar.defaultProps = {
+  setIsSidebarOpen: () => {}
+};
 
 export default Navbar

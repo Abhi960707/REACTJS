@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI =
     process.env.MONGODB_URI ||
-    "mongodb+srv://abhi:abhi123@cluster0.jow73br.mongodb.net/todo?appName=Cluster0";
+// Add this database mongodb Atlas connection string 
 const ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",

@@ -3,16 +3,41 @@ const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-
+const transporter = require("./config/mail");//mail
 const app = express();
+//Check Email Sending
+app.get('/send-mail', async (req, res) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: 'thisis_test_email@gmail.com',
+      subject: 'Test Email For Checking Send Or Not',
+      html: '<h2>Hello Abhijeet  🚀</h2>',
+    })
+
+    res.json({ message: 'Email Sent Successfully' })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: 'Email Sending Failed' })
+  }
+})
+console.log(process.env.EMAIL)
+console.log(process.env.EMAIL_PASSWORD)
+
 
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI =
     process.env.MONGODB_URI ||
+<<<<<<< HEAD
 // Add this database mongodb Atlas connection string 
+=======
+    "mongodb+srv://abhi:abhi123@cluster0.jow73br.mongodb.net/tododb?retryWrites=true&w=majority&appName=Cluster0";
+>>>>>>> 27b237e (Security implemented)
 const ALLOWED_ORIGINS = [
+        "http://localhost:8082",
     "http://localhost:5173",
     "http://localhost:5174",
+    "http://localhost:5175",
     process.env.CLIENT_ORIGIN
 ].filter(Boolean);
 
@@ -47,6 +72,7 @@ app.get("/", (req, res) => {
     res.send("Server running");
 });
 
+
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/todo", require("./routes/todo"));
 app.use("/api/todo/:todoId/subtasks", require("./routes/subtask"));
@@ -54,3 +80,4 @@ app.use("/api/todo/:todoId/subtasks", require("./routes/subtask"));
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+ 

@@ -36,32 +36,6 @@ const formatDate = (dateValue) => {
   })
 }
 
-const formatDateTime = (dateValue) => {
-  if (!dateValue) return 'N/A'
-  return new Date(dateValue).toLocaleString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  })
-}
-
-const getDueStatus = (dueDate, completed) => {
-  if (!dueDate || completed) return null
-
-  const end = new Date(dueDate)
-  const now = new Date()
-  const diff = end.getTime() - now.getTime()
-
-  if (diff < 0) return { label: 'Overdue', className: 'bg-red-50 text-red-600 border-red-200' }
-  if (diff < 24 * 60 * 60 * 1000) {
-    return { label: 'Due soon', className: 'bg-amber-50 text-amber-700 border-amber-200' }
-  }
-  return { label: 'On track', className: 'bg-slate-100 text-slate-600 border-slate-200' }
-}
-
 const getViewTitle = (activeView) => {
   if (activeView === 'my-tasks') return 'My tasks'
   if (activeView === 'assigned-by-me') return 'Assigned by me'

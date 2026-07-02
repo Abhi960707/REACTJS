@@ -13,11 +13,43 @@ const Login = () => {
   // State for forgot password functionality
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
+  const [resetOtp, setResetOtp] = useState('')
   const [resetSecretKeyword, setResetSecretKeyword] = useState('')
   const [isVerified, setIsVerified] = useState(false) // New state to toggle between verification and reset
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [forgotOtpSending, setForgotOtpSending] = useState(false)
+  const [forgotOtpCooldown, setForgotOtpCooldown] = useState(0)
   const navigate = useNavigate()
+
+  React.useEffect(() => {
+    let timer
+    if (forgotOtpCooldown > 0) {
+      timer = setTimeout(() => setForgotOtpCooldown(forgotOtpCooldown - 1), 1000)
+    }
+    return () => clearTimeout(timer)
+  }, [forgotOtpCooldown])
+
+  const sendForgotOtp = async () => {
+    if (!resetEmail.trim()) {
+      setError('Please enter your email first')
+      setTimeout(() => setError(''), 3000)
+      return
+    }
+    setError('')
+    try {
+      setForgotOtpSending(true)
+      await API.post('/auth/request-password-reset', {
+        email: resetEmail.trim(),
+      })
+      setForgotOtpCooldown(90) // 1 minute 30 seconds
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send OTP')
+      setTimeout(() => setError(''), 3000)
+    } finally {
+      setForgotOtpSending(false)
+    }
+  }
 
   const submit = async (e) => {
     e.preventDefault()
@@ -49,8 +81,8 @@ const Login = () => {
   const handleForgotPasswordRequest = async (e) => {
     e.preventDefault()
     setError('')
-    if (!resetEmail.trim() || !resetSecretKeyword.trim()) {
-      setError('Email and secret keyword are required.')
+    if (!resetEmail.trim()) {
+      setError('Email is required.')
       setTimeout(() => setError(''), 3000)
       return
     }
@@ -59,13 +91,12 @@ const Login = () => {
       setLoading(true)
       await API.post('/auth/request-password-reset', {
         email: resetEmail.trim(),
-        secretKeyword: resetSecretKeyword.trim(),
       })
-      
+      setForgotOtpCooldown(90)
       setIsVerified(true)
       setError('')
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or secret keyword.')
+      setError(err.response?.data?.message || 'Invalid email.')
       setTimeout(() => setError(''), 3000)
     } finally {
       setLoading(false)
@@ -76,8 +107,8 @@ const Login = () => {
     e.preventDefault()
     setError('')
 
-    if (!newPassword.trim() || !confirmNewPassword.trim()) {
-      setError('New password and confirm password are required.')
+    if (!resetOtp.trim() || !resetSecretKeyword.trim() || !newPassword.trim() || !confirmNewPassword.trim()) {
+      setError('All fields are required.')
       setTimeout(() => setError(''), 3000)
       return
     }
@@ -95,6 +126,7 @@ const Login = () => {
       setLoading(true)
       await API.post('/auth/reset-password', {
         email: resetEmail.trim(),
+        otp: resetOtp.trim(),
         secretKeyword: resetSecretKeyword.trim(),
         newPassword
       })
@@ -102,10 +134,10 @@ const Login = () => {
       setShowForgotPasswordModal(false)
       setIsVerified(false)
       setResetEmail('')
+      setResetOtp('')
       setResetSecretKeyword('')
       setNewPassword('')
       setConfirmNewPassword('')
-      navigate('/login') // Redirect to login page
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to reset password.')
       setTimeout(() => setError(''), 3000)
@@ -118,6 +150,7 @@ const Login = () => {
     setShowForgotPasswordModal(true)
     setIsVerified(false)
     setResetEmail('')
+    setResetOtp('')
     setResetSecretKeyword('')
     setNewPassword('')
     setConfirmNewPassword('')
@@ -145,6 +178,8 @@ const Login = () => {
       </div>
 
       {error && (
+
+        
         <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
           {error}
         </div>
@@ -208,8 +243,8 @@ const Login = () => {
             </h3>
             <p className="mt-2 text-center text-sm text-slate-500">
               {isVerified
-                ? 'Enter your new password.'
-                : 'Enter your email and security keyword.'}
+                ? 'Enter the OTP code from email, security keyword, and new password.'
+                : 'Enter your email address to request a verification OTP.'}
             </p>
 
             {error && (
@@ -220,6 +255,38 @@ const Login = () => {
 
             {isVerified ? (
               <form onSubmit={handlePasswordReset} className="mt-6 space-y-5">
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">One-Time Password (OTP)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter 6-digit OTP"
+                      className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
+                      value={resetOtp}
+                      onChange={(e) => setResetOtp(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      disabled={forgotOtpSending || forgotOtpCooldown > 0}
+                      onClick={sendForgotOtp}
+                      className="rounded-2xl bg-slate-900 px-4 py-3.5 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70 whitespace-nowrap"
+                    >
+                      {forgotOtpSending ? 'Sending...' : forgotOtpCooldown > 0 ? `Resend in ${Math.floor(forgotOtpCooldown / 60)}:${String(forgotOtpCooldown % 60).padStart(2, '0')}` : 'Resend OTP'}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-semibold text-slate-700">Security Keyword</label>
+                  <input
+                    type="text"
+                    placeholder="Enter your security keyword"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
+                    value={resetSecretKeyword}
+                    onChange={(e) => setResetSecretKeyword(e.target.value)}
+                    required
+                  />
+                </div>
                 <div>
                   <label className="mb-2 block text-sm font-semibold text-slate-700">New Password</label>
                   <input
@@ -256,17 +323,6 @@ const Login = () => {
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
                     value={resetEmail}
                     onChange={(e) => setResetEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm font-semibold text-slate-700">Security Keyword</label>
-                  <input
-                    type="text"
-                    placeholder="Enter your secret name"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
-                    value={resetSecretKeyword}
-                    onChange={(e) => setResetSecretKeyword(e.target.value)}
                     required
                   />
                 </div>

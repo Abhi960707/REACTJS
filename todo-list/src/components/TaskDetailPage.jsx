@@ -262,9 +262,9 @@ const TaskDetailPage = () => {
           teamMembers={teamMembers}
           notificationCount={notifications.length}
         />
-        <div className="mx-auto max-w-2xl space-y-6 px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl space-y-8 px-4 py-10 sm:px-6 lg:px-8">
         {/* Back button */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
           <button
             onClick={() => navigate(-1)}
             className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"

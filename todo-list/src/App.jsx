@@ -25,6 +25,8 @@ function App() {
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/task/:id" element={<ProtectedRoute><TaskDetailPage /></ProtectedRoute>} />
         <Route path="/notification/:id" element={<ProtectedRoute><NotificationDetailPage /></ProtectedRoute>} />
+        <Route path="*" element= {<div className='ml-165 pt-90 text-3xl font-black'>PAge Not Fount</div>}/>
+        <Route path="/404" element={<ProtectedRoute>  </ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )

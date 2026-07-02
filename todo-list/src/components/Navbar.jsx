@@ -17,26 +17,19 @@ const BellIcon = () => (
   </svg>
 )
 
-const Navbar = ({ notificationCount, onNotificationClick, user: propUser, setIsSidebarOpen }) => { // Accept propUser and setIsSidebarOpen
+const Navbar = ({ notificationCount, onNotificationClick, user: propUser }) => { // Accept propUser
   const navigate = useNavigate();
-  // Use propUser if provided, otherwise fallback to stored user
-  const [user, setUser] = useState(() => propUser || getStoredUser() || { name: 'User', email: 'guest@example.com' });
+  // Derive user directly from propUser or fallback to stored user
+  const user = propUser || getStoredUser() || { name: 'User', email: 'guest@example.com' };
   
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [users, setUsers] = useState([])
   const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const [navNotifCount, setNavNotifCount] = useState(0)
+  const [navNotifCountState, setNavNotifCountState] = useState(0)
   
   const searchRef = useRef(null)
   const profileRef = useRef(null)
-
-  // Sync state with propUser if it changes from outside
-  useEffect(() => {
-    if (propUser) {
-      setUser(propUser);
-    }
-  }, [propUser]);
 
   useEffect(() => {
     if (isSearchOpen && users.length === 0) {
@@ -45,12 +38,12 @@ const Navbar = ({ notificationCount, onNotificationClick, user: propUser, setIsS
   }, [isSearchOpen, users.length])
 
   useEffect(() => {
-    if (notificationCount !== undefined) {
-      setNavNotifCount(notificationCount)
-    } else {
-      API.get('/todo/notifications').then(res => setNavNotifCount(res?.data?.length || 0)).catch(() => {})
+    if (notificationCount === undefined) {
+      API.get('/todo/notifications').then(res => setNavNotifCountState(res?.data?.length || 0)).catch(() => {})
     }
   }, [notificationCount])
+
+  const navNotifCount = notificationCount !== undefined ? notificationCount : navNotifCountState;
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -211,9 +204,6 @@ const Navbar = ({ notificationCount, onNotificationClick, user: propUser, setIsS
   )
 }
 
-// Add default props for safety, especially for setIsSidebarOpen if it's not always provided
-Navbar.defaultProps = {
-  setIsSidebarOpen: () => {}
-};
+
 
 export default Navbar

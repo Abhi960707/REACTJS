@@ -181,7 +181,7 @@ const ProgressBar = ({ subtasks }) => {
 }
 
 /* ── Subtask (main export) ────────────────────────────────── */
-const Subtask = ({ todoId, currentUserId, isOwner, teamMembers = [] }) => {
+const Subtask = ({ todoId, isOwner, teamMembers = [] }) => {
   const [subtasks, setSubtasks] = useState([])
   const [loading, setLoading]   = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -220,7 +220,7 @@ const Subtask = ({ todoId, currentUserId, isOwner, teamMembers = [] }) => {
 
     try {
       await API.patch(`/todo/${todoId}/subtasks/${draggableId}/status`, { status: newStatus })
-    } catch (err) {
+    } catch {
       setError('Failed to update status. Please try again.')
       setTimeout(() => setError(''), 3000)
       // Revert on failure
@@ -235,7 +235,7 @@ const Subtask = ({ todoId, currentUserId, isOwner, teamMembers = [] }) => {
     )
     try {
       await API.patch(`/todo/${todoId}/subtasks/${subtaskId}/status`, { status: newStatus })
-    } catch (err) {
+    } catch {
       setError('Failed to update status. Please try again.')
       setTimeout(() => setError(''), 3000)
       fetchSubtasks()

@@ -35,7 +35,7 @@ const Todo = ({
     <section className="rounded-[32px] border border-slate-200 bg-white/90 p-6 shadow-[0_24px_55px_rgba(15,23,42,0.06)] backdrop-blur">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-slate-400">
+          <p className="text-[20px] font-semibold uppercase tracking-[0.94em] text-slate-400">
             Create Task
           </p>
           <h2 className="mt-2 text-3xl font-semibold text-slate-900">Plan work professionally</h2>
@@ -47,9 +47,9 @@ const Todo = ({
           type="button"
           onClick={addTodo}
           disabled={isSubmitting}
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-9 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          <MdAddTask size={18} />
+          <MdAddTask size={28} />
           {isSubmitting ? 'Saving task...' : 'Create task'}
         </button>
       </div>

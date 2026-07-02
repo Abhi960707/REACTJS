@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import API from '../api'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
-import { getStoredUser } from '../utils/auth'
+import { getStoredUser, clearAuthSession } from '../utils/auth'
 
 const Settings = () => {
   const navigate = useNavigate()
@@ -87,7 +87,7 @@ const Settings = () => {
 
     try {
       setLoading(true)
-      const res = await API.put('/auth/change-password', {
+      await API.put('/auth/change-password', {
         currentPassword: pwForm.currentPassword,
         newPassword: pwForm.newPassword
       })
@@ -105,6 +105,30 @@ const Settings = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (pageLoading) {
+    return (
+      <>
+        <Navbar user={user} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+        <div
+          className="min-h-screen bg-slate-50 transition-[padding-left] duration-[260ms]"
+          style={{ paddingLeft: isSidebarOpen ? 272 : 68 }}
+        >
+          <Sidebar
+            user={user}
+            activeView="settings"
+            stats={{ total: 0, progress: 0, myTasks: 0, assignedByMe: 0 }}
+            teamMembers={[]}
+            isSidebarOpen={isSidebarOpen}
+            setIsSidebarOpen={setIsSidebarOpen}
+          />
+          <div className="flex flex-1 items-center justify-center min-h-[calc(100vh-60px)]">
+            <p className="text-slate-500 font-semibold tracking-widest uppercase animate-pulse">Loading Settings...</p>
+          </div>
+        </div>
+      </>
+    )
   }
 
   return (

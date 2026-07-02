@@ -10,9 +10,6 @@ import {
   MdLogout,
 } from 'react-icons/md'
 
-const initials = (name = '') =>
-  name.split(' ').slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join('') || '?'
-
 /* ═══════════════════════════ Sidebar ═══════════════════════════ */
 export default function Sidebar({
   activeView,
@@ -63,6 +60,7 @@ export default function Sidebar({
     : 'hidden'
 
   /* ── reusable nav button renderer ── */
+  // eslint-disable-next-line no-unused-vars
   const renderNavBtn = ({ Icon, label, sublabel, badge, active, onClick }) => (
     <button
       key={label}

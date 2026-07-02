@@ -2,7 +2,12 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Otp = require("../models/Otp");
 const auth = require("../middleware/auth");
+const otpGenerator = require("otp-generator");
+const nodemailer = require("nodemailer");
+const transporter = require("../config/mail");
+
 
 const JWT_SECRET = process.env.JWT_SECRET || "secret";
 const createToken = (userId) => jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: "7d" });
@@ -18,14 +23,64 @@ router.get("/test", (req, res) => {
     res.json("Auth Route Are Working");
 });
 
+router.post("/send-signup-otp", async (req, res) => {
+    try {
+        const email = req.body.email?.trim().toLowerCase();
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "Already Account Exist" });
+        }
+
+        // Generate 6-digit OTP
+        const otp = otpGenerator.generate(6, {
+            upperCaseAlphabets: false,
+            lowerCaseAlphabets: false,
+            specialChars: false,
+        });
+
+        // Save or update in Otp collection
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
+        await Otp.findOneAndUpdate(
+            { email },
+            { otp, expiresAt },
+            { upsert: true, new: true }
+        );
+
+        // Send OTP via email
+        await transporter.sendMail({
+            from: process.env.EMAIL,
+            to: email,
+            subject: "Your Signup Verification OTP",
+            html: `<h2>Welcome!</h2>
+                   <p>Your verification OTP is <strong>${otp}</strong>.</p>
+                   <p>It is valid for 10 minutes.</p>`,
+        });
+
+        res.json({ message: "OTP sent successfully to your email" });
+    } catch (err) {
+        console.error("Error sending signup OTP:", err);
+        res.status(500).json({ message: "Unable to send OTP" });
+    }
+});
+
 router.post("/signup", async (req, res) => {
     try {
+        //console Check
+        console.log(req.body); 
+        
         const name = req.body.name?.trim();
         const email = req.body.email?.trim().toLowerCase();
         const password = req.body.password?.trim();
         const secretKeyword = req.body.secretKeyword?.trim();
+        const otp = req.body.otp?.trim();
 
-        if (!name || !email || !password || !secretKeyword) {
+        if (!name || !email || !password || !secretKeyword || !otp) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -38,6 +93,12 @@ router.post("/signup", async (req, res) => {
             return res.status(400).json({ message: "Already Account Exist" });
         }
 
+        // Verify OTP
+        const otpDoc = await Otp.findOne({ email });
+        if (!otpDoc || otpDoc.otp !== otp) {
+            return res.status(400).json({ message: "Invalid or expired OTP" });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             name,
@@ -47,6 +108,9 @@ router.post("/signup", async (req, res) => {
         });
 
         const savedUser = await newUser.save();
+
+        // Delete OTP record upon successful registration
+        await Otp.deleteOne({ email });
 
         res.status(201).json({
             token: createToken(savedUser._id),
@@ -192,9 +256,9 @@ router.put("/change-password", auth, async (req, res) => {
         user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
 
-        res.json({ message: "Password changed successfully" });
+        res.json({ message: "Password Changed Successfully !" });
     } catch (err) {
-        res.status(500).json({ message: "Unable to change password" });
+        res.status(500).json({ message: "Unable To Change PAssword" });
     }
 });
 router.get("/all-users", auth, async (req, res) => {
@@ -249,47 +313,120 @@ router.delete("/user/:id", auth, async (req, res) => {
     }
 });
 
+//Otp request process and password reseting
 router.post("/request-password-reset", async (req, res) => {
-    try {
-        const email = req.body.email?.trim().toLowerCase();
-        const secretKeyword = req.body.secretKeyword?.trim();
+  try {
+    const email = req.body.email?.trim().toLowerCase();
 
-        if (!email || !secretKeyword) {
-            return res.status(400).json({ message: "Email and secret keyword are required" });
-        }
+    const user = await User.findOne({ email });
 
-        const user = await User.findOne({ email, secretKeyword });
-        if (!user) {
-            return res.status(400).json({ message: "Invalid email or secret keyword" });
-        }
-
-        res.status(200).json({ message: "Details verified. Proceed to reset password." });
-    } catch (err) {
-        console.error("Forgot password request error:", err);
-        res.status(500).json({ message: "Unable to process password reset request." });
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
     }
+
+    const otp = otpGenerator.generate(6, {
+      upperCaseAlphabets: false,
+      lowerCaseAlphabets: false,
+      specialChars: false,
+    });
+
+    user.resetOtp = otp;
+    user.resetOtpExpiry = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: user.email,
+      subject: "Password Reset OTP",
+      html: `<h2>Your OTP is ${otp}</h2>
+             <p>Valid for 10 minutes</p>`,
+    });
+
+    res.json({
+      message: "OTP sent to email",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Unable to send OTP",
+    });
+  }
 });
+
+// Verify Otp process foir confirmatiom
+router.post("/verify-reset-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (user.resetOtp !== otp) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    if (user.resetOtpExpiry < Date.now()) {
+      return res.status(400).json({
+        message: "OTP expired So Resend And Try again!",
+      });
+    }
+
+    res.json({
+      message: "OTP verified",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Verification failed",
+    });
+  }
+});
+
+
 
 router.post("/reset-password", async (req, res) => {
     try {
         const email = req.body.email?.trim().toLowerCase();
+        const otp = req.body.otp?.trim();
         const secretKeyword = req.body.secretKeyword?.trim();
         const newPassword = req.body.newPassword?.trim();
 
-        if (!email || !secretKeyword || !newPassword) {
-            return res.status(400).json({ message: "Email, secret keyword and new password are required." });
+        if (!email || !otp || !secretKeyword || !newPassword) {
+            return res.status(400).json({ message: "Email, OTP, secret keyword and new password are required." });
         }
 
         if (newPassword.length < 4) {
             return res.status(400).json({ message: "Password must be at least 4 characters." });
         }
 
-        const user = await User.findOne({ email, secretKeyword });
+        const user = await User.findOne({ email });
         if (!user) {
-            return res.status(404).json({ message: "User not found or invalid details." });
+            return res.status(404).json({ message: "User not found." });
+        }
+
+        if (user.secretKeyword !== secretKeyword) {
+            return res.status(400).json({ message: "Invalid secret keyword." });
+        }
+
+        if (user.resetOtp !== otp) {
+            return res.status(400).json({ message: "Invalid OTP." });
+        }
+
+        if (!user.resetOtpExpiry || user.resetOtpExpiry < Date.now()) {
+            return res.status(400).json({ message: "OTP has expired." });
         }
 
         user.password = await bcrypt.hash(newPassword, 10);
+        user.resetOtp = null;
+        user.resetOtpExpiry = null;
         await user.save();
 
         res.status(200).json({ message: "Reset Password Successfully!" });

@@ -23,6 +23,15 @@ const UserSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
+        resetOtp:{
+            type: String,
+        default:null,       
+     },
+     resetOtpExpiry:{
+        type:Date,
+        default:null,
+     },
+
         // Which logged-in user created this account.
         // null = self-registered via /signup
         createdBy: {

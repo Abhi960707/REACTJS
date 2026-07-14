@@ -184,7 +184,7 @@ const Signup = () => {
         <div>
           <label className="mb-2 block text-sm font-semibold text-slate-700">Security Keyword</label>
           <input
-            type="text"
+            type="password"
             placeholder="Enter a recovery keyword"
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm text-slate-800 outline-none transition focus:border-slate-400 focus:bg-white"
             value={secretKeyword}

@@ -23,7 +23,8 @@ const UserProfile = () => {
 
   // Layout state
   const loggedInUser = getStoredUser()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState()
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false)
   const [allTodos, setAllTodos] = useState([])
   const [teamMembers, setTeamMembers] = useState([])
   const [notifications, setNotifications] = useState([])
@@ -79,12 +80,14 @@ const UserProfile = () => {
   if (loading) {
     return (
       <>
-        <Navbar user={loggedInUser} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+        <Navbar user={loggedInUser} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered} />
         <div 
           className="min-h-screen bg-slate-50 transition-[padding-left] duration-[260ms]"
-          style={{ paddingLeft: isSidebarOpen ? 272 : 68 }}
+          style={{ paddingLeft: isSidebarOpen || isSidebarHovered ? 272 : 68 }}
         >
-          <Sidebar activeView="profile" user={loggedInUser} stats={{}} teamMembers={[]} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+          <Sidebar activeView="profile" user={loggedInUser} stats={{}} teamMembers={[]} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered} />
           <div className="flex flex-1 items-center justify-center min-h-[calc(100vh-60px)]">
             <p className="text-slate-500 font-semibold tracking-widest uppercase">Loading Profile...</p>
           </div>
@@ -107,10 +110,11 @@ const UserProfile = () => {
         onNotificationClick={() => navigate('/notifications')}
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered}
       /> 
       <div 
         className="min-h-screen bg-[radial-gradient(circle_at_top,#f8fafc_0%,#eef2ff_40%,#e2e8f0_100%)] transition-[padding-left] duration-[260ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-        style={{ paddingLeft: isSidebarOpen ? 272 : 68 }}
+        style={{ paddingLeft: isSidebarOpen || isSidebarHovered ? 272 : 68 }}
       >
         <Sidebar 
           activeView="profile" 
@@ -120,6 +124,7 @@ const UserProfile = () => {
           notificationCount={notifications.length}
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered}
         />
         <div className="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         

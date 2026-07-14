@@ -200,6 +200,7 @@ const Subtask = ({ todoId, isOwner, teamMembers = [] }) => {
     }
   }, [todoId])
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchSubtasks() }, [fetchSubtasks])
 
   /* Group by column */

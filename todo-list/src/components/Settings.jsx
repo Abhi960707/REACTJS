@@ -12,7 +12,8 @@ const Settings = () => {
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
   const [msg, setMsg] = useState({ text: '', ok: true })
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState()
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false)
 
   // State for layout
   const [todos, setTodos] = useState([])
@@ -110,10 +111,11 @@ const Settings = () => {
   if (pageLoading) {
     return (
       <>
-        <Navbar user={user} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+        <Navbar user={user} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered} />
         <div
           className="min-h-screen bg-slate-50 transition-[padding-left] duration-[260ms]"
-          style={{ paddingLeft: isSidebarOpen ? 272 : 68 }}
+          style={{ paddingLeft: isSidebarOpen || isSidebarHovered ? 272 : 68 }}
         >
           <Sidebar
             user={user}
@@ -122,6 +124,7 @@ const Settings = () => {
             teamMembers={[]}
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered}
           />
           <div className="flex flex-1 items-center justify-center min-h-[calc(100vh-60px)]">
             <p className="text-slate-500 font-semibold tracking-widest uppercase animate-pulse">Loading Settings...</p>
@@ -133,10 +136,11 @@ const Settings = () => {
 
   return (
     <>
-      <Navbar user={user} notificationCount={notifications.length} onNotificationClick={() => navigate('/notifications')} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+      <Navbar user={user} notificationCount={notifications.length} onNotificationClick={() => navigate('/notifications')} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered} />
       <div
         className="min-h-screen bg-[radial-gradient(circle_at_top,#f8fafc_0%,#eef2ff_40%,#e2e8f0_100%)] transition-[padding-left] duration-[260ms]"
-        style={{ paddingLeft: isSidebarOpen ? 272 : 68 }}
+        style={{ paddingLeft: isSidebarOpen || isSidebarHovered ? 272 : 68 }}
       >
         <Sidebar
           user={user}
@@ -146,6 +150,7 @@ const Settings = () => {
           notificationCount={notifications.length}
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered}
         />
         <div className="max-w-3xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
           <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-[0_24px_55px_rgba(15,23,42,0.06)] border border-slate-200">

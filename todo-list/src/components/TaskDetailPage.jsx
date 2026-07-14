@@ -43,7 +43,7 @@ const formatDateTime = (d) =>
       })
     : 'N/A'
 
-const BACKEND = 'http://localhost:5001'
+const BACKEND = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
 
 const TaskDetailPage = () => {
   const { id } = useParams()
@@ -67,6 +67,7 @@ const TaskDetailPage = () => {
   const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     Promise.all([
       API.get(`/todo/${id}`),

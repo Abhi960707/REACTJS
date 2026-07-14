@@ -28,11 +28,7 @@ console.log(process.env.EMAIL_PASSWORD)
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI =
     process.env.MONGODB_URI ||
-<<<<<<< HEAD
-// Add this database mongodb Atlas connection string 
-=======
     "mongodb+srv://abhi:abhi123@cluster0.jow73br.mongodb.net/tododb?retryWrites=true&w=majority&appName=Cluster0";
->>>>>>> 27b237e (Security implemented)
 const ALLOWED_ORIGINS = [
         "http://localhost:8082",
     "http://localhost:5173",

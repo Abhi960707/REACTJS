@@ -20,6 +20,7 @@ export default function Sidebar({
   notificationCount,
   isSidebarOpen,
   setIsSidebarOpen,
+  setIsSidebarHovered,
 }) {
   const navigate = useNavigate()
   const location = useLocation()
@@ -39,8 +40,18 @@ export default function Sidebar({
 
   /* ── hover delay ── */
   const leaveTimer = useRef(null)
-  const onEnter = useCallback(() => { clearTimeout(leaveTimer.current); setHovered(true) }, [])
-  const onLeave = useCallback(() => { leaveTimer.current = setTimeout(() => setHovered(false), 150) }, [])
+  const onEnter = useCallback(() => { 
+    clearTimeout(leaveTimer.current); 
+    setHovered(true);
+    if (setIsSidebarHovered) setIsSidebarHovered(true);
+  }, [setIsSidebarHovered])
+  
+  const onLeave = useCallback(() => { 
+    leaveTimer.current = setTimeout(() => {
+      setHovered(false);
+      if (setIsSidebarHovered) setIsSidebarHovered(false);
+    }, 150) 
+  }, [setIsSidebarHovered])
 
   /* ── handlers ── */
   const logout = () => { clearAuthSession(); navigate('/login') }

@@ -38,7 +38,7 @@ const formatDateTime = (d) =>
       })
     : 'N/A'
 
-const BACKEND = 'http://localhost:5001'
+const BACKEND = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'
 
 const NotificationDetailPage = () => {
   const { id } = useParams()
@@ -53,12 +53,14 @@ const NotificationDetailPage = () => {
   const [outcome, setOutcome] = useState(null) // 'done' | 'pending'
 
   // State for layout
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState()
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false)
   const [todos, setTodos] = useState([])
   const [notifications, setNotifications] = useState([])
   const [teamMembers, setTeamMembers] = useState([])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     Promise.all([
       API.get(`/todo/${id}`),
@@ -162,15 +164,17 @@ const NotificationDetailPage = () => {
         notificationCount={notifications.length}
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered}
       />
       <div
         className="min-h-screen bg-[radial-gradient(circle_at_top,#f8fafc_0%,#eef2ff_40%,#e2e8f0_100%)] transition-[padding-left] duration-[260ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-        style={{ paddingLeft: isSidebarOpen ? 272 : 68 }}
+        style={{ paddingLeft: isSidebarOpen || isSidebarHovered ? 272 : 68 }}
       >
         <Sidebar
           activeView={null}
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
+        setIsSidebarHovered={setIsSidebarHovered}
           stats={stats}
           user={currentUser}
           teamMembers={teamMembers}

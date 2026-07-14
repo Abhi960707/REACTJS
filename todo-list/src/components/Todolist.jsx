@@ -135,6 +135,7 @@ const Todolist = () => {
 
   useEffect(() => {
     if (location.state?.targetView) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveView(location.state.targetView)
       // Clean up state so refresh doesn't hold it
       window.history.replaceState({}, document.title)
@@ -145,6 +146,7 @@ const Todolist = () => {
   const [successMessage, setSuccessMessage] = useState('') // New state for success message
   const [errorMessage, setErrorMessage] = useState('')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false)
   const shownNotificationsRef = useRef(new Set())
   const [userToDelete, setUserToDelete] = useState(null)   // { id, name } or null
 
@@ -189,6 +191,7 @@ const Todolist = () => {
 
     applyNotificationPermission()
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDashboardData(token)
       .catch((error) => {
         if (error.response?.status === 401) {
@@ -405,19 +408,19 @@ const Todolist = () => {
       />
       <div
         className="min-h-screen bg-[radial-gradient(circle_at_top,#f8fafc_0%,#eef2ff_40%,#e2e8f0_100%)] transition-[padding-left] duration-[260ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-      style={{ paddingLeft: isSidebarOpen ? 272 : 68 }}
-    >
-      <Sidebar
-        activeView={activeView}
-
-        isSidebarOpen={isSidebarOpen} // Pass the state value
-        setActiveView={setActiveView}
-        stats={stats}
-        user={user}
-        teamMembers={teamMembers}
-        notificationCount={notifications.length}
-        setIsSidebarOpen={setIsSidebarOpen}
-      />
+        style={{ paddingLeft: isSidebarOpen || isSidebarHovered ? 272 : 68 }}
+      >
+        <Sidebar
+          activeView={activeView}
+          isSidebarOpen={isSidebarOpen}
+          setActiveView={setActiveView}
+          stats={stats}
+          user={user}
+          teamMembers={teamMembers}
+          notificationCount={notifications.length}
+          setIsSidebarOpen={setIsSidebarOpen}
+          setIsSidebarHovered={setIsSidebarHovered}
+        />
       <div className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <main className="min-w-0 space-y-6">
